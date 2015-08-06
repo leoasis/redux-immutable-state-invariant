@@ -1,0 +1,22 @@
+{
+  "name": "redux-immutable-state-invariant",
+  "version": "1.0.0",
+  "description": "Redux middleware that detects mutations between and outside redux dispatches. For development use only.",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel --out-dir dist src",
+    "test": "mocha --compilers js:babel/register"
+  },
+  "author": "Leonardo Andres Garcia Crespo <leoasis@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel": "^5.8.3",
+    "expect": "^1.8.0",
+    "immutable": "^3.7.4",
+    "mocha": "^2.2.5"
+  },
+  "dependencies": {
+    "invariant": "^2.1.0",
+    "lodash": "^3.10.1"
+  }
+}
