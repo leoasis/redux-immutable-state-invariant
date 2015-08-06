@@ -1,6 +1,6 @@
 # redux-immutable-state-invariant
 
-Redux middleware that spits an error on you when you try to mutate your state either inside a dispatch or between dispatches.
+Redux middleware that spits an error on you when you try to mutate your state either inside a dispatch or between dispatches. **For development use only!**
 
 ## How to install
 
@@ -18,14 +18,14 @@ To use it, just add it as a middleware in your redux store:
 
 ```js
 const {applyMiddleware, combineReducers, createStore} = require('redux');
-const immutableStateInvariant = require('redux-immutable-state-invariant');
+const thunk = require('redux-thunk');
 const reducers = require('./reducers');
 
 const reducer = combineReducers(reducers);
 
 // Be sure to ONLY add this middleware in development!
 const middleware = process.env.NODE_ENV !== 'production' ?
-  [immutableStateInvariant, thunk] :
+  [require('redux-immutable-state-invariant'), thunk] :
   [thunk];
 const createStoreWithMiddleware = applyMiddleware(...middleware)(createStore);
 const store = createStoreWithMiddleware(reducer);
