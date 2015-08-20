@@ -1,11 +1,13 @@
 {
   "name": "redux-immutable-state-invariant",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Redux middleware that detects mutations between and outside redux dispatches. For development use only.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "clean": "rm -rf dist",
     "build": "babel --out-dir dist src",
-    "test": "mocha --compilers js:babel/register"
+    "test": "mocha --compilers js:babel/register",
+    "prepublish": "npm run clean && npm run build"
   },
   "author": "Leonardo Andres Garcia Crespo <leoasis@gmail.com>",
   "license": "MIT",
