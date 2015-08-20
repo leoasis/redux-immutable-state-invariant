@@ -2,10 +2,8 @@ import invariant from 'invariant';
 import cloneDeep from 'lodash/lang/clonedeep';
 import wasMutated from './wasMutated';
 
-// Based on https://github.com/facebook/immutable-js/issues/421#issuecomment-87089399
 function isImmutableDefault(value) {
-  return typeof value !== 'object' ||
-    (typeof value.equals === 'function' && typeof value.hashCode === 'function');
+  return typeof value !== 'object';
 }
 
 function copyState(state, isImmutable) {

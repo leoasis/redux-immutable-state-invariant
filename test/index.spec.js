@@ -1,5 +1,4 @@
 import expect from 'expect';
-import Immutable from 'immutable';
 import warnMutationsMiddleware from '../src/index';
 
 describe('middleware', () => {
@@ -67,7 +66,7 @@ describe('middleware', () => {
     }
 
     beforeEach(() => {
-      state = {foo: {bar: [2, 3, 4], baz: 'baz', qux: Immutable.fromJS({a: 1, b: 2})}};
+      state = {foo: {bar: [2, 3, 4], baz: 'baz'}};
     });
 
     it('should send the action through the middleware chain', () => {
@@ -89,10 +88,6 @@ describe('middleware', () => {
       'changing nested string': (s) => {
         s.foo.baz = 'changed!';
         return s;
-      },
-      'setting a nested immutable object': (s) => {
-        s.foo.qux = s.foo.qux.set('a', 3);
-        return s;
       }
     };
 
@@ -109,9 +104,6 @@ describe('middleware', () => {
       },
       'returning a new state object with nested new array': (s) => {
         return {...s, foo: {...s.foo, bar: [...s.foo.bar, 5]}};
-      },
-      'returning a new state object with nested new immutable state': (s) => {
-        return {...s, foo: {...s.foo, qux: s.foo.qux.set('a', 3)}};
       }
     };
 

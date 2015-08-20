@@ -12,7 +12,6 @@
   "devDependencies": {
     "babel": "^5.8.3",
     "expect": "^1.8.0",
-    "immutable": "^3.7.4",
     "mocha": "^2.2.5"
   },
   "dependencies": {
