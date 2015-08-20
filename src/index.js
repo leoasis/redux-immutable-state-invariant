@@ -1,5 +1,5 @@
 import invariant from 'invariant';
-import cloneDeep from 'lodash/lang/clonedeep';
+import cloneDeep from 'lodash/lang/cloneDeep';
 import wasMutated from './wasMutated';
 
 function isImmutableDefault(value) {

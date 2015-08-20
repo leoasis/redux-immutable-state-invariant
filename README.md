@@ -31,7 +31,7 @@ const reducer = combineReducers(reducers);
 
 // Be sure to ONLY add this middleware in development!
 const middleware = process.env.NODE_ENV !== 'production' ?
-  [require('redux-immutable-state-invariant'), thunk] :
+  [require('redux-immutable-state-invariant')(), thunk] :
   [thunk];
 const createStoreWithMiddleware = applyMiddleware(...middleware)(createStore);
 const store = createStoreWithMiddleware(reducer);
