@@ -88,6 +88,10 @@ describe('middleware', () => {
       'changing nested string': (s) => {
         s.foo.baz = 'changed!';
         return s;
+      },
+      'removing nested state': (s) => {
+        delete s.foo;
+        return s;
       }
     };
 
@@ -104,6 +108,9 @@ describe('middleware', () => {
       },
       'returning a new state object with nested new array': (s) => {
         return {...s, foo: {...s.foo, bar: [...s.foo.bar, 5]}};
+      },
+      'removing nested state': (s) => {
+        return {...s, foo: {}};
       }
     };
 

@@ -16,14 +16,14 @@ function copyState(state, isImmutable) {
 
 const BETWEEN_DISPATCHES_MESSAGE = [
   'A state mutation was detected between dispatches.',
-  ' This may cause incorrect behavior.',
-  '(https://github.com/gaearon/redux#my-views-arent-updating)'
+  ' This may cause incorrect behavior. ',
+  '(http://rackt.github.io/redux/docs/Troubleshooting.html#never-mutate-reducer-arguments)'
 ].join('');
 
 const INSIDE_DISPATCH_MESSAGE = [
   'A state mutation was detected inside a dispatch.',
-  ' Take a look at the store(s) handling the action %s.',
-  '(https://github.com/gaearon/redux#my-views-arent-updating)'
+  ' Take a look at the reducer(s) handling the action %s. ',
+  '(http://rackt.github.io/redux/docs/Troubleshooting.html#never-mutate-reducer-arguments)'
 ].join('');
 
 export default function immutableStateInvariantMiddleware(isImmutable = isImmutableDefault) {
@@ -46,7 +46,7 @@ export default function immutableStateInvariantMiddleware(isImmutable = isImmuta
       invariant(
         !wasMutated(stateRef, stateCopy, lastStateRef, isImmutable),
         INSIDE_DISPATCH_MESSAGE,
-        action.type
+        action.type || action
       );
 
       lastStateCopy = copyState(lastStateRef, isImmutable);
