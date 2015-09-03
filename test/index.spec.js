@@ -1,123 +1,72 @@
 import expect from 'expect';
-import warnMutationsMiddleware from '../src/index';
+import immutableStateInvariantMiddleware from '../src/index';
 
-describe('middleware', () => {
-  describe('warnMutationsMiddleware', () => {
-    let state;
-    const getState = () => state;
+describe('immutableStateInvariantMiddleware', () => {
+  let state;
+  const getState = () => state;
 
-    function middleware(next) {
-      return warnMutationsMiddleware()({getState})(next);
-    }
+  function middleware(next) {
+    return immutableStateInvariantMiddleware()({getState})(next);
+  }
 
-    function testCasesForMutation(mutation) {
-      it('should throw if happening inside the dispatch', () => {
-        const next = action => {
-          state = mutation(state);
-          return action;
-        };
+  beforeEach(() => {
+    state = {foo: {bar: [2, 3, 4], baz: 'baz'}};
+  });
 
-        const dispatch = middleware(next);
+  it('sends the action through the middleware chain', () => {
+    const next = action => ({...action, returned: true});
+    const dispatch = middleware(next);
 
-        expect(() => {
-          dispatch({type: 'SOME_ACTION'});
-        }).toThrow();
-      });
+    expect(dispatch({type: 'SOME_ACTION'})).toEqual({type: 'SOME_ACTION', returned: true});
+  });
 
-      it('should throw if happening between dispatches', () => {
-        const next = action => action;
-
-        const dispatch = middleware(next);
-
-        dispatch({type: 'SOME_ACTION'});
-        state = mutation(state);
-        expect(() => {
-          dispatch({type: 'SOME_OTHER_ACTION'});
-        }).toThrow();
-      });
-    }
-
-    function testCasesForNonMutation(nonMutation) {
-
-      it('should not throw if happening inside the dispatch', () => {
-        const next = action => {
-          state = nonMutation(state);
-          return action;
-        };
-
-        const dispatch = middleware(next);
-
-        expect(() => {
-          dispatch({type: 'SOME_ACTION'});
-        }).toNotThrow();
-      });
-
-      it('should not throw if happening between dispatches', () => {
-        const next = action => action;
-
-        const dispatch = middleware(next);
-
-        dispatch({type: 'SOME_ACTION'});
-        state = nonMutation(state);
-        expect(() => {
-          dispatch({type: 'SOME_OTHER_ACTION'});
-        }).toNotThrow();
-      });
-    }
-
-    beforeEach(() => {
-      state = {foo: {bar: [2, 3, 4], baz: 'baz'}};
-    });
-
-    it('should send the action through the middleware chain', () => {
-      const next = action => action;
-      const dispatch = middleware(next);
-
-      expect(dispatch({type: 'SOME_ACTION'})).toEqual({type: 'SOME_ACTION'});
-    });
-
-    const mutations = {
-      'mutating nested array': (s) => {
-        s.foo.bar.push(5);
-        return s;
-      },
-      'mutating nested array and setting new root object': (s) => {
-        s.foo.bar.push(5);
-        return {...s};
-      },
-      'changing nested string': (s) => {
-        s.foo.baz = 'changed!';
-        return s;
-      },
-      'removing nested state': (s) => {
-        delete s.foo;
-        return s;
-      }
+  it('throws if mutating inside the dispatch', () => {
+    const next = action => {
+      state.foo.bar.push(5);
+      return action;
     };
 
-    Object.keys(mutations).forEach((mutationDesc) => {
-      describe(`mutating state by ${mutationDesc}`, () => {
-        testCasesForMutation(mutations[mutationDesc]);
-      });
-    });
+    const dispatch = middleware(next);
 
-    const nonMutations = {
-      'returning same state': (s) => s,
-      'returning a new state object with nested new string': (s) => {
-        return {...s, foo: {...s.foo, baz: 'changed!'}};
-      },
-      'returning a new state object with nested new array': (s) => {
-        return {...s, foo: {...s.foo, bar: [...s.foo.bar, 5]}};
-      },
-      'removing nested state': (s) => {
-        return {...s, foo: {}};
-      }
+    expect(() => {
+      dispatch({type: 'SOME_ACTION'});
+    }).toThrow(new RegExp('foo\\.bar\\.3'));
+  });
+
+  it('throws if mutating between dispatches', () => {
+    const next = action => action;
+
+    const dispatch = middleware(next);
+
+    dispatch({type: 'SOME_ACTION'});
+    state.foo.bar.push(5);
+    expect(() => {
+      dispatch({type: 'SOME_OTHER_ACTION'});
+    }).toThrow(new RegExp('foo\\.bar\\.3'));
+  });
+
+  it('does not throw if not mutating inside the dispatch', () => {
+    const next = action => {
+      state = {...state, foo: {...state.foo, baz: 'changed!'}};
+      return action;
     };
 
-    Object.keys(nonMutations).forEach((nonMutationDesc) => {
-      describe(`not mutating state by ${nonMutationDesc}`, () => {
-        testCasesForNonMutation(nonMutations[nonMutationDesc]);
-      });
-    });
+    const dispatch = middleware(next);
+
+    expect(() => {
+      dispatch({type: 'SOME_ACTION'});
+    }).toNotThrow();
+  });
+
+  it('does not throw if not mutating between dispatches', () => {
+    const next = action => action;
+
+    const dispatch = middleware(next);
+
+    dispatch({type: 'SOME_ACTION'});
+    state = {...state, foo: {...state.foo, baz: 'changed!'}};
+    expect(() => {
+      dispatch({type: 'SOME_OTHER_ACTION'});
+    }).toNotThrow();
   });
 });

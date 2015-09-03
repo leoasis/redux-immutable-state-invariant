@@ -1,12 +1,12 @@
 import any from 'lodash/collection/any';
 
-export default function wasMutated(prevStateRef, prevState, state, isImmutable, sameParentRef = true) {
+export default function wasMutated(prevStateRef, prevState, state, isImmutable, sameParentRef = true, path = []) {
   if (prevState == null || state == null || isImmutable(prevState)) {
     if (sameParentRef) {
-      return prevState !== state;
+      return { wasMutated: prevState !== state, path };
     }
 
-    return false;
+    return { wasMutated: false, path };
   }
 
   const sameRef = prevStateRef === state;
@@ -20,7 +20,11 @@ export default function wasMutated(prevStateRef, prevState, state, isImmutable, 
     keys[key] = true;
   });
 
-  return any(Object.keys(keys), key =>
-    wasMutated(prevStateRef[key], prevState[key], state[key], isImmutable, sameRef)
-  );
+  for (let key of Object.keys(keys)) {
+    const result = wasMutated(prevStateRef[key], prevState[key], state[key], isImmutable, sameRef, path.concat(key));
+    if (result.wasMutated) {
+      return result;
+    }
+  }
+  return { wasMutated: false };
 }
