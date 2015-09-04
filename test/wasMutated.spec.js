@@ -4,23 +4,23 @@ import copyState from '../src/copyState';
 import wasMutated from '../src/wasMutated';
 
 describe('wasMutated', () => {
-  let state;
-
-  function testCasesForMutation(mutation) {
+  function testCasesForMutation(spec) {
     it('returns true and the mutated path', () => {
+      const state = spec.prevState();
       const copiedPrevState = copyState(state, isImmutable);
-      const newState = mutation.fn(state);
+      const newState = spec.fn(state);
 
       expect(
         wasMutated(state, copiedPrevState, newState, isImmutable)
-      ).toEqual({wasMutated: true, path: mutation.path});
+      ).toEqual({wasMutated: true, path: spec.path});
     });
   }
 
-  function testCasesForNonMutation(nonMutation) {
+  function testCasesForNonMutation(spec) {
     it('returns false', () => {
+      const state = spec.prevState();
       const copiedPrevState = copyState(state, isImmutable);
-      const newState = nonMutation(state);
+      const newState = spec.fn(state);
 
       expect(
         wasMutated(state, copiedPrevState, newState, isImmutable)
@@ -28,19 +28,29 @@ describe('wasMutated', () => {
     });
   }
 
-  beforeEach(() => {
-    state = {foo: {bar: [2, 3, 4], baz: 'baz'}};
-  });
-
   const mutations = {
-    'mutating nested array': {
+    'adding to nested array': {
+      prevState: () => ({
+        foo: {
+          bar: [2, 3, 4],
+          baz: 'baz'
+        },
+        stuff: []
+      }),
       fn: (s) => {
         s.foo.bar.push(5);
         return s;
       },
       path: ['foo', 'bar', '3']
     },
-    'mutating nested array and setting new root object': {
+    'adding to nested array and setting new root object': {
+      prevState: () => ({
+        foo: {
+          bar: [2, 3, 4],
+          baz: 'baz'
+        },
+        stuff: []
+      }),
       fn: (s) => {
         s.foo.bar.push(5);
         return {...s};
@@ -48,6 +58,13 @@ describe('wasMutated', () => {
       path: ['foo', 'bar', '3']
     },
     'changing nested string': {
+      prevState: () => ({
+        foo: {
+          bar: [2, 3, 4],
+          baz: 'baz'
+        },
+        stuff: []
+      }),
       fn: (s) => {
         s.foo.baz = 'changed!';
         return s;
@@ -55,11 +72,42 @@ describe('wasMutated', () => {
       path: ['foo', 'baz']
     },
     'removing nested state': {
+      prevState: () => ({
+        foo: {
+          bar: [2, 3, 4],
+          baz: 'baz'
+        },
+        stuff: []
+      }),
       fn: (s) => {
         delete s.foo;
         return s;
       },
       path: ['foo']
+    },
+    'adding to array': {
+      prevState: () => ({
+        foo: {
+          bar: [2, 3, 4],
+          baz: 'baz'
+        },
+        stuff: []
+      }),
+      fn: (s) => {
+        s.stuff.push(1);
+        return s;
+      },
+      path: ['stuff', 0]
+    },
+    'adding object to array': {
+      prevState: () => ({
+        stuff: []
+      }),
+      fn: (s) => {
+        s.stuff.push({foo: 1, bar: 2});
+        return s;
+      },
+      path: ['stuff', 0]
     }
   };
 
@@ -70,15 +118,55 @@ describe('wasMutated', () => {
   });
 
   const nonMutations = {
-    'returning same state': (s) => s,
-    'returning a new state object with nested new string': (s) => {
-      return {...s, foo: {...s.foo, baz: 'changed!'}};
+    'from undefined to something': {
+      prevState: () => undefined,
+      fn: (s) => ({foo: 'bar'})
     },
-    'returning a new state object with nested new array': (s) => {
-      return {...s, foo: {...s.foo, bar: [...s.foo.bar, 5]}};
+    'returning same state': {
+      prevState: () => ({
+        foo: {
+          bar: [2, 3, 4],
+          baz: 'baz'
+        },
+        stuff: []
+      }),
+      fn: (s) => s
     },
-    'removing nested state': (s) => {
-      return {...s, foo: {}};
+    'returning a new state object with nested new string': {
+      prevState: () => ({
+        foo: {
+          bar: [2, 3, 4],
+          baz: 'baz'
+        },
+        stuff: []
+      }),
+      fn: (s) => {
+        return {...s, foo: {...s.foo, baz: 'changed!'}};
+      }
+    },
+    'returning a new state object with nested new array': {
+      prevState: () => ({
+        foo: {
+          bar: [2, 3, 4],
+          baz: 'baz'
+        },
+        stuff: []
+      }),
+      fn: (s) => {
+        return {...s, foo: {...s.foo, bar: [...s.foo.bar, 5]}};
+      }
+    },
+    'removing nested state': {
+      prevState: () => ({
+        foo: {
+          bar: [2, 3, 4],
+          baz: 'baz'
+        },
+        stuff: []
+      }),
+      fn: (s) => {
+        return {...s, foo: {}};
+      }
     }
   };
 

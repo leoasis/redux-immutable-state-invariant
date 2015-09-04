@@ -40,7 +40,7 @@ export default function immutableStateInvariantMiddleware(isImmutable = isImmuta
         !result.wasMutated,
         INSIDE_DISPATCH_MESSAGE,
         (result.path || []).join('.'),
-        action.type || action
+        JSON.stringify(action)
       );
 
       lastStateCopy = copyState(lastStateRef, isImmutable);

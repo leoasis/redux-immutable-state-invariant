@@ -1,12 +1,12 @@
 import any from 'lodash/collection/any';
 
-export default function wasMutated(prevStateRef, prevState, state, isImmutable, sameParentRef = true, path = []) {
+export default function wasMutated(prevStateRef, prevState, state, isImmutable, sameParentRef = false, path = []) {
   if (prevState == null || state == null || isImmutable(prevState)) {
     if (sameParentRef) {
       return { wasMutated: prevState !== state, path };
     }
 
-    return { wasMutated: false, path };
+    return { wasMutated: false };
   }
 
   const sameRef = prevStateRef === state;
