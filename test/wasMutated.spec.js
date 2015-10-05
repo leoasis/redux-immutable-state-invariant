@@ -11,7 +11,7 @@ describe('wasMutated', () => {
       const newState = spec.fn(state);
 
       expect(
-        wasMutated(state, copiedPrevState, newState, isImmutable)
+        wasMutated(state, copiedPrevState, isImmutable)
       ).toEqual({wasMutated: true, path: spec.path});
     });
   }
@@ -23,7 +23,7 @@ describe('wasMutated', () => {
       const newState = spec.fn(state);
 
       expect(
-        wasMutated(state, copiedPrevState, newState, isImmutable)
+        wasMutated(state, copiedPrevState, isImmutable)
       ).toEqual({wasMutated: false});
     });
   }
@@ -108,16 +108,68 @@ describe('wasMutated', () => {
         return s;
       },
       path: ['stuff', 0]
-    }
+    },
+    'mutating previous state and returning new state': {
+      prevState: () => ({ counter: 0 }),
+      fn: (s) => {
+        s.mutation = true;
+        return { ...s, counter: s.counter + 1 };
+      },
+      path: ['mutation']
+    },
+    'mutating previous state with non immutable type and returning new state': {
+      prevState: () => ({ counter: 0 }),
+      fn: (s) => {
+        s.mutation = [1, 2, 3];
+        return { ...s, counter: s.counter + 1 };
+      },
+      path: ['mutation']
+    },
+    'mutating previous state with non immutable type and returning new state without that property': {
+      prevState: () => ({ counter: 0 }),
+      fn: (s) => {
+        s.mutation = [1, 2, 3];
+        return { counter: s.counter + 1 };
+      },
+      path: ['mutation']
+    },
+    'mutating previous state with non immutable type and returning new simple state': {
+      prevState: () => ({ counter: 0 }),
+      fn: (s) => {
+        s.mutation = [1, 2, 3];
+        return 1;
+      },
+      path: ['mutation']
+    },
+    'mutating previous state by deleting property and returning new state without that property': {
+      prevState: () => ({ counter: 0, toBeDeleted: true }),
+      fn: (s) => {
+        delete s.toBeDeleted;
+        return { counter: s.counter + 1 };
+      },
+      path: ['toBeDeleted']
+    },
+    'mutating previous state by deleting nested property': {
+      prevState: () => ({ nested: { counter: 0, toBeDeleted: true }, foo: 1 }),
+      fn: (s) => {
+        delete s.nested.toBeDeleted;
+        return { nested: { counter: s.counter + 1 } };
+      },
+      path: ['nested', 'toBeDeleted']
+    },
   };
 
   Object.keys(mutations).forEach((mutationDesc) => {
-    describe(`mutating state by ${mutationDesc}`, () => {
+    describe(mutationDesc, () => {
       testCasesForMutation(mutations[mutationDesc]);
     });
   });
 
   const nonMutations = {
+    'not doing anything': {
+      prevState: () => ({ a:1, b:2 }),
+      fn: (s) => s
+    },
     'from undefined to something': {
       prevState: () => undefined,
       fn: (s) => ({foo: 'bar'})
@@ -171,7 +223,7 @@ describe('wasMutated', () => {
   };
 
   Object.keys(nonMutations).forEach((nonMutationDesc) => {
-    describe(`not mutating state by ${nonMutationDesc}`, () => {
+    describe(nonMutationDesc, () => {
       testCasesForNonMutation(nonMutations[nonMutationDesc]);
     });
   });

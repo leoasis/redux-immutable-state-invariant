@@ -24,7 +24,7 @@ export default function immutableStateInvariantMiddleware(isImmutable = isImmuta
     return (next) => (action) => {
       const stateRef = getState();
 
-      result = wasMutated(lastStateRef, lastStateCopy, stateRef, isImmutable);
+      result = wasMutated(lastStateRef, lastStateCopy, isImmutable);
       invariant(
         !result.wasMutated,
         BETWEEN_DISPATCHES_MESSAGE,
@@ -35,7 +35,7 @@ export default function immutableStateInvariantMiddleware(isImmutable = isImmuta
       const dispatchedAction = next(action);
       lastStateRef = getState();
 
-      result = wasMutated(stateRef, stateCopy, lastStateRef, isImmutable);
+      result = wasMutated(stateRef, stateCopy, isImmutable);
       invariant(
         !result.wasMutated,
         INSIDE_DISPATCH_MESSAGE,
