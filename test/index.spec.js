@@ -69,4 +69,19 @@ describe('immutableStateInvariantMiddleware', () => {
       dispatch({type: 'SOME_OTHER_ACTION'});
     }).toNotThrow();
   });
+
+  it('works correctly with circular references', () => {
+    const next = action => action;
+
+    const dispatch = middleware(next);
+
+    let x = {};
+    let y = {};
+    x.y = y;
+    y.x = x;
+
+    expect(() => {
+      dispatch({type: 'SOME_ACTION', x});
+    }).toNotThrow();
+  });
 });
