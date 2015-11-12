@@ -1,4 +1,5 @@
 import invariant from 'invariant';
+import stringify from 'json-stringify-safe';
 import isImmutableDefault from './isImmutable';
 import trackForMutations from './trackForMutations';
 
@@ -46,7 +47,7 @@ export default function immutableStateInvariantMiddleware(isImmutable = isImmuta
         !result.wasMutated,
         INSIDE_DISPATCH_MESSAGE,
         (result.path || []).join('.'),
-        JSON.stringify(action)
+        stringify(action)
       );
 
       return dispatchedAction;

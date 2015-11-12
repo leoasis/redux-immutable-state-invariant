@@ -18,6 +18,7 @@
     "mocha": "^2.2.5"
   },
   "dependencies": {
-    "invariant": "^2.1.0"
+    "invariant": "^2.1.0",
+    "json-stringify-safe": "^5.0.1"
   }
 }
