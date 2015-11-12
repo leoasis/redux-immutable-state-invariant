@@ -1,7 +1,6 @@
 import invariant from 'invariant';
 import isImmutableDefault from './isImmutable';
-import copyState from './copyState';
-import wasMutated from './wasMutated';
+import trackForMutations from './trackForMutations';
 
 const BETWEEN_DISPATCHES_MESSAGE = [
   'A state mutation was detected between dispatches, in the path `%s`.',
@@ -16,26 +15,33 @@ const INSIDE_DISPATCH_MESSAGE = [
 ].join(' ');
 
 export default function immutableStateInvariantMiddleware(isImmutable = isImmutableDefault) {
+  let track = trackForMutations.bind(null, isImmutable);
+
   return ({getState}) => {
-    let lastStateRef = getState();
-    let lastStateCopy = copyState(lastStateRef, isImmutable);
+    let state = getState();
+    let tracker = track(state);
 
     let result;
     return (next) => (action) => {
-      const stateRef = getState();
+      state = getState();
 
-      result = wasMutated(lastStateRef, lastStateCopy, isImmutable);
+      result = tracker.detectMutations();
+      // Track before potentially not meeting the invariant
+      tracker = track(state);
+
       invariant(
         !result.wasMutated,
         BETWEEN_DISPATCHES_MESSAGE,
         (result.path || []).join('.')
       );
 
-      const stateCopy = copyState(stateRef, isImmutable);
       const dispatchedAction = next(action);
-      lastStateRef = getState();
+      state = getState();
 
-      result = wasMutated(stateRef, stateCopy, isImmutable);
+      result = tracker.detectMutations();
+      // Track before potentially not meeting the invariant
+      tracker = track(state);
+
       invariant(
         !result.wasMutated,
         INSIDE_DISPATCH_MESSAGE,
@@ -43,7 +49,6 @@ export default function immutableStateInvariantMiddleware(isImmutable = isImmuta
         JSON.stringify(action)
       );
 
-      lastStateCopy = copyState(lastStateRef, isImmutable);
       return dispatchedAction;
     };
   };

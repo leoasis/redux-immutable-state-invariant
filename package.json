@@ -18,7 +18,6 @@
     "mocha": "^2.2.5"
   },
   "dependencies": {
-    "invariant": "^2.1.0",
-    "lodash": "^3.10.1"
+    "invariant": "^2.1.0"
   }
 }

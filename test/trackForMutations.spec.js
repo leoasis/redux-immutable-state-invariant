@@ -1,36 +1,35 @@
 import expect from 'expect';
 import isImmutable from '../src/isImmutable';
-import copyState from '../src/copyState';
-import wasMutated from '../src/wasMutated';
+import trackForMutations from '../src/trackForMutations';
 
-describe('wasMutated', () => {
+describe('trackForMutations', () => {
   function testCasesForMutation(spec) {
     it('returns true and the mutated path', () => {
-      const state = spec.prevState();
-      const copiedPrevState = copyState(state, isImmutable);
+      const state = spec.getState();
+      const tracker = trackForMutations(isImmutable, state);
       const newState = spec.fn(state);
 
       expect(
-        wasMutated(state, copiedPrevState, isImmutable)
+        tracker.detectMutations()
       ).toEqual({wasMutated: true, path: spec.path});
     });
   }
 
   function testCasesForNonMutation(spec) {
     it('returns false', () => {
-      const state = spec.prevState();
-      const copiedPrevState = copyState(state, isImmutable);
+      const state = spec.getState();
+      const tracker = trackForMutations(isImmutable, state);
       const newState = spec.fn(state);
 
       expect(
-        wasMutated(state, copiedPrevState, isImmutable)
+        tracker.detectMutations()
       ).toEqual({wasMutated: false});
     });
   }
 
   const mutations = {
     'adding to nested array': {
-      prevState: () => ({
+      getState: () => ({
         foo: {
           bar: [2, 3, 4],
           baz: 'baz'
@@ -44,7 +43,7 @@ describe('wasMutated', () => {
       path: ['foo', 'bar', '3']
     },
     'adding to nested array and setting new root object': {
-      prevState: () => ({
+      getState: () => ({
         foo: {
           bar: [2, 3, 4],
           baz: 'baz'
@@ -58,7 +57,7 @@ describe('wasMutated', () => {
       path: ['foo', 'bar', '3']
     },
     'changing nested string': {
-      prevState: () => ({
+      getState: () => ({
         foo: {
           bar: [2, 3, 4],
           baz: 'baz'
@@ -72,7 +71,7 @@ describe('wasMutated', () => {
       path: ['foo', 'baz']
     },
     'removing nested state': {
-      prevState: () => ({
+      getState: () => ({
         foo: {
           bar: [2, 3, 4],
           baz: 'baz'
@@ -86,7 +85,7 @@ describe('wasMutated', () => {
       path: ['foo']
     },
     'adding to array': {
-      prevState: () => ({
+      getState: () => ({
         foo: {
           bar: [2, 3, 4],
           baz: 'baz'
@@ -100,7 +99,7 @@ describe('wasMutated', () => {
       path: ['stuff', 0]
     },
     'adding object to array': {
-      prevState: () => ({
+      getState: () => ({
         stuff: []
       }),
       fn: (s) => {
@@ -110,7 +109,7 @@ describe('wasMutated', () => {
       path: ['stuff', 0]
     },
     'mutating previous state and returning new state': {
-      prevState: () => ({ counter: 0 }),
+      getState: () => ({ counter: 0 }),
       fn: (s) => {
         s.mutation = true;
         return { ...s, counter: s.counter + 1 };
@@ -118,7 +117,7 @@ describe('wasMutated', () => {
       path: ['mutation']
     },
     'mutating previous state with non immutable type and returning new state': {
-      prevState: () => ({ counter: 0 }),
+      getState: () => ({ counter: 0 }),
       fn: (s) => {
         s.mutation = [1, 2, 3];
         return { ...s, counter: s.counter + 1 };
@@ -126,7 +125,7 @@ describe('wasMutated', () => {
       path: ['mutation']
     },
     'mutating previous state with non immutable type and returning new state without that property': {
-      prevState: () => ({ counter: 0 }),
+      getState: () => ({ counter: 0 }),
       fn: (s) => {
         s.mutation = [1, 2, 3];
         return { counter: s.counter + 1 };
@@ -134,7 +133,7 @@ describe('wasMutated', () => {
       path: ['mutation']
     },
     'mutating previous state with non immutable type and returning new simple state': {
-      prevState: () => ({ counter: 0 }),
+      getState: () => ({ counter: 0 }),
       fn: (s) => {
         s.mutation = [1, 2, 3];
         return 1;
@@ -142,7 +141,7 @@ describe('wasMutated', () => {
       path: ['mutation']
     },
     'mutating previous state by deleting property and returning new state without that property': {
-      prevState: () => ({ counter: 0, toBeDeleted: true }),
+      getState: () => ({ counter: 0, toBeDeleted: true }),
       fn: (s) => {
         delete s.toBeDeleted;
         return { counter: s.counter + 1 };
@@ -150,13 +149,21 @@ describe('wasMutated', () => {
       path: ['toBeDeleted']
     },
     'mutating previous state by deleting nested property': {
-      prevState: () => ({ nested: { counter: 0, toBeDeleted: true }, foo: 1 }),
+      getState: () => ({ nested: { counter: 0, toBeDeleted: true }, foo: 1 }),
       fn: (s) => {
         delete s.nested.toBeDeleted;
         return { nested: { counter: s.counter + 1 } };
       },
       path: ['nested', 'toBeDeleted']
     },
+    'update reference': {
+      getState: () => ({ foo: {} }),
+      fn: (s) => {
+        s.foo = {};
+        return s;
+      },
+      path: ['foo']
+    }
   };
 
   Object.keys(mutations).forEach((mutationDesc) => {
@@ -167,15 +174,15 @@ describe('wasMutated', () => {
 
   const nonMutations = {
     'not doing anything': {
-      prevState: () => ({ a:1, b:2 }),
+      getState: () => ({ a:1, b:2 }),
       fn: (s) => s
     },
     'from undefined to something': {
-      prevState: () => undefined,
+      getState: () => undefined,
       fn: (s) => ({foo: 'bar'})
     },
     'returning same state': {
-      prevState: () => ({
+      getState: () => ({
         foo: {
           bar: [2, 3, 4],
           baz: 'baz'
@@ -185,7 +192,7 @@ describe('wasMutated', () => {
       fn: (s) => s
     },
     'returning a new state object with nested new string': {
-      prevState: () => ({
+      getState: () => ({
         foo: {
           bar: [2, 3, 4],
           baz: 'baz'
@@ -197,7 +204,7 @@ describe('wasMutated', () => {
       }
     },
     'returning a new state object with nested new array': {
-      prevState: () => ({
+      getState: () => ({
         foo: {
           bar: [2, 3, 4],
           baz: 'baz'
@@ -209,7 +216,7 @@ describe('wasMutated', () => {
       }
     },
     'removing nested state': {
-      prevState: () => ({
+      getState: () => ({
         foo: {
           bar: [2, 3, 4],
           baz: 'baz'
