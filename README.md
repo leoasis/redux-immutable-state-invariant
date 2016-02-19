@@ -25,16 +25,18 @@ To use it, just add it as a middleware in your redux store:
 ```js
 const {applyMiddleware, combineReducers, createStore} = require('redux');
 const thunk = require('redux-thunk');
-const reducers = require('./reducers');
-
-const reducer = combineReducers(reducers);
+const reducer = require('./reducers/index');
 
 // Be sure to ONLY add this middleware in development!
 const middleware = process.env.NODE_ENV !== 'production' ?
   [require('redux-immutable-state-invariant')(), thunk] :
   [thunk];
-const createStoreWithMiddleware = applyMiddleware(...middleware)(createStore);
-const store = createStoreWithMiddleware(reducer);
+
+// Note passing middleware as the last argument to createStore requires redux@>=3.1.0
+const store = createStore(
+  reducer,
+  applyMiddleware(...middleware)
+);
 ```
 
 Then if you're doing things correctly, you should see nothing different. But if you don't, that is, if you're mutating your data somewhere in your app either in a dispatch or between dispatches, an error will be thrown with a (hopefully) descriptive message.
