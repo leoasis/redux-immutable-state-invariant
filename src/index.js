@@ -54,3 +54,10 @@ export default function immutableStateInvariantMiddleware(isImmutable = isImmuta
     };
   };
 }
+
+export function stateInvariantTestHelper(isImmutable = isImmutableDefault) {
+  return {
+    trackObj: (obj) => { return trackForMutations(isImmutable, obj); },
+    hasMutated: (tracked) => { return tracked.detectMutations().wasMutated; }
+  };
+}
