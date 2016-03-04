@@ -1,5 +1,7 @@
 # redux-immutable-state-invariant
 
+[![Build Status](https://travis-ci.org/leoasis/redux-immutable-state-invariant.png)](https://travis-ci.org/leoasis/redux-immutable-state-invariant)
+
 Redux middleware that spits an error on you when you try to mutate your state either inside a dispatch or between dispatches. **For development use only!**
 
 ## Why?
