@@ -1,42 +1,20 @@
-# redux-immutable-state-invariant
+# object-invariant-test-helper
 
-Redux middleware that spits an error on you when you try to mutate your state either inside a dispatch or between dispatches. **For development use only!**
+A module that is useful for when needing to test for immutability.
 
-## Why?
+This module began life as a fork of redux-immutable-state-invariant by Leonardo Andres Garcia Crespo.
 
-Because [you're not allowed to mutate your state in your reducers](http://rackt.github.io/redux/docs/Troubleshooting.html#never-mutate-reducer-arguments)!. And by extension, you shouldn't mutate them either outside. In order to change state in your app, you should always return a new instance of your state with the changes.
-
-If you're using a library such as `Immutable.js`, this is automatically done for you since the structures provided by that library don't allow you to mutate them (as long as you don't have mutable stuff as values in those collections). However, if you're using regular objects and arrays, you should be careful to avoid mutations.
-
-## How to install
+## Setup
 
 This lib is intended to use only during development. **Don't use this in production!**
 
 ```js
-npm install --save-dev redux-immutable-state-invariant
+npm install --save-dev object-invariant-test-helper
 ```
 
-## How to use
+## Usage
 
-As said above, **don't use this in production!** It involves a lot of object copying and will degrade your app's performance. This is intended to be a tool to aid you in development and help you catch bugs.
-
-To use it, just add it as a middleware in your redux store:
 
 ```js
-const {applyMiddleware, combineReducers, createStore} = require('redux');
-const thunk = require('redux-thunk');
-const reducer = require('./reducers/index');
 
-// Be sure to ONLY add this middleware in development!
-const middleware = process.env.NODE_ENV !== 'production' ?
-  [require('redux-immutable-state-invariant')(), thunk] :
-  [thunk];
-
-// Note passing middleware as the last argument to createStore requires redux@>=3.1.0
-const store = createStore(
-  reducer,
-  applyMiddleware(...middleware)
-);
 ```
-
-Then if you're doing things correctly, you should see nothing different. But if you don't, that is, if you're mutating your data somewhere in your app either in a dispatch or between dispatches, an error will be thrown with a (hopefully) descriptive message.
