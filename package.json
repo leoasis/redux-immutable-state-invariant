@@ -5,18 +5,34 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "babel --out-dir dist src",
+    "lint": "eslint src test",
     "test": "mocha --compilers js:babel/register",
     "prepublish": "npm run clean && npm run build"
   },
   "contributors": [
-    { "name": "Leonardo Andres Garcia Crespo", "email": "leoasis@gmail.com" },
-    { "name": "Jana Beck", "email": "jana@tidepool.org" },
-    { "name": "Gordon Dent", "email": "gordonmdent@gmail.com" }
+    {
+      "name": "Leonardo Andres Garcia Crespo",
+      "email": "leoasis@gmail.com"
+    },
+    {
+      "name": "Jana Beck",
+      "email": "jana@tidepool.org"
+    },
+    {
+      "name": "Gordon Dent",
+      "email": "gordonmdent@gmail.com"
+    }
   ],
   "license": "MIT",
   "devDependencies": {
-    "babel": "^5.8.3",
-    "expect": "^1.8.0",
-    "mocha": "^2.2.5"
+    "babel": "5.8.35",
+    "babel-eslint": "5.0.0",
+    "eslint": "1.10.3",
+    "expect": "1.15.2",
+    "mocha": "2.4.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tidepool-org/object-invariant-test-helper.git"
   }
 }
