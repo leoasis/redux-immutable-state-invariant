@@ -18,8 +18,7 @@ npm install --save-dev object-invariant-test-helper
 
 
 ```js
-import { stateInvariantTestHelperMkr } from 'object-invariant-test-helper';
-let stateInvariantTestHelper = stateInvariantTestHelperMkr();
+import objectInvariantTestHelper from '../src/index';
 
 const toAdd = 2;
 const expectedState = {num: 3};
@@ -27,7 +26,7 @@ const expectedState = {num: 3};
 describe('goodReducer', () => {
   it('should *not* mutate state', () => {
     let initialState = {num: 1};
-    const tracked = stateInvariantTestHelper.trackObj(initialState);
+    const tracked = objectInvariantTestHelper.trackObj(initialState);
 
     let finalState = goodReducer(initialState, {
       type: 'ADD',
@@ -35,7 +34,14 @@ describe('goodReducer', () => {
     });
 
     expect(finalState).toEqual(expectedState);
-    expect(stateInvariantTestHelper.hasMutated(tracked)).toEqual(false);
+    expect(objectInvariantTestHelper.hasMutated(tracked)).toEqual(false);
   });
 });
+```
+
+If you want to provide your own `isImmutable` function, you may:
+
+```js
+import { objectInvariantTestHelperMkr } from '../src/index';
+let objectInvariantTestHelper = objectInvariantTestHelperMkr(isImmutable);
 ```

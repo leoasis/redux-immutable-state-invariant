@@ -1,6 +1,5 @@
 import expect from 'expect';
-import stateInvariantTestHelperMkr from '../src/index';
-let stateInvariantTestHelper = stateInvariantTestHelperMkr();
+import objectInvariantTestHelper from '../src/index';
 
 /* global describe, it */
 
@@ -32,7 +31,7 @@ const expectedState = {num: 3};
 describe('badReducer', () => {
   it('should mutate state', () => {
     let initialState = {num: 1};
-    const tracked = stateInvariantTestHelper.trackObj(initialState);
+    const tracked = objectInvariantTestHelper.trackObj(initialState);
 
     let finalState = badReducer(initialState, {
       type: 'ADD',
@@ -40,14 +39,14 @@ describe('badReducer', () => {
     });
 
     expect(finalState).toEqual(expectedState);
-    expect(stateInvariantTestHelper.hasMutated(tracked)).toEqual(true);
+    expect(objectInvariantTestHelper.hasMutated(tracked)).toEqual(true);
   });
 });
 
 describe('goodReducer', () => {
   it('should *not* mutate state', () => {
     let initialState = {num: 1};
-    const tracked = stateInvariantTestHelper.trackObj(initialState);
+    const tracked = objectInvariantTestHelper.trackObj(initialState);
 
     let finalState = goodReducer(initialState, {
       type: 'ADD',
@@ -55,6 +54,6 @@ describe('goodReducer', () => {
     });
 
     expect(finalState).toEqual(expectedState);
-    expect(stateInvariantTestHelper.hasMutated(tracked)).toEqual(false);
+    expect(objectInvariantTestHelper.hasMutated(tracked)).toEqual(false);
   });
 });
