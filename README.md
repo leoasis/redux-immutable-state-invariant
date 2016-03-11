@@ -2,7 +2,7 @@
 
 A module that is useful for when needing to test for immutability.
 
-This module began life as a fork of redux-immutable-state-invariant by Leonardo Andres Garcia Crespo.
+This module began life as a fork of [redux-immutable-state-invariant](https://github.com/leoasis/redux-immutable-state-invariant) by Leonardo Andres Garcia Crespo.
 
 ## Setup
 
