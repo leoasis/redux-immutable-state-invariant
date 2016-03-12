@@ -2,6 +2,8 @@ import expect from 'expect';
 import isImmutable from '../src/isImmutable';
 import trackForMutations from '../src/trackForMutations';
 
+/* global describe, it */
+
 describe('trackForMutations', () => {
   function testCasesForMutation(spec) {
     it('returns true and the mutated path', () => {
@@ -96,7 +98,7 @@ describe('trackForMutations', () => {
         s.stuff.push(1);
         return s;
       },
-      path: ['stuff', 0]
+      path: ['stuff', '0']
     },
     'adding object to array': {
       getState: () => ({
@@ -106,7 +108,7 @@ describe('trackForMutations', () => {
         s.stuff.push({foo: 1, bar: 2});
         return s;
       },
-      path: ['stuff', 0]
+      path: ['stuff', '0']
     },
     'mutating previous state and returning new state': {
       getState: () => ({ counter: 0 }),

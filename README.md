@@ -1,42 +1,47 @@
-# redux-immutable-state-invariant
+# object-invariant-test-helper
 
-Redux middleware that spits an error on you when you try to mutate your state either inside a dispatch or between dispatches. **For development use only!**
+A module that is useful for testing whether you've mutated an object. Use it with [redux](http://redux.js.org/ 'redux.js.org') when testing your reducers to ensure you don't ever mutate an object in a reducer but always return a new object.
 
-## Why?
+This module began life as a fork of [redux-immutable-state-invariant](https://github.com/leoasis/redux-immutable-state-invariant 'GitHub: redux-immutable-state-invariant') by [Leonardo Andres Garcia Crespo (@leoasis)](https://github.com/leoasis 'GitHub: @leoasis').
 
-Because [you're not allowed to mutate your state in your reducers](http://rackt.github.io/redux/docs/Troubleshooting.html#never-mutate-reducer-arguments)!. And by extension, you shouldn't mutate them either outside. In order to change state in your app, you should always return a new instance of your state with the changes.
+## Setup
 
-If you're using a library such as `Immutable.js`, this is automatically done for you since the structures provided by that library don't allow you to mutate them (as long as you don't have mutable stuff as values in those collections). However, if you're using regular objects and arrays, you should be careful to avoid mutations.
+This lib is intended for use only during development, specifically testing.
 
-## How to install
-
-This lib is intended to use only during development. **Don't use this in production!**
+**Don't use this in production!**
 
 ```js
-npm install --save-dev redux-immutable-state-invariant
+npm install --save-dev object-invariant-test-helper
 ```
 
-## How to use
+## Usage
 
-As said above, **don't use this in production!** It involves a lot of object copying and will degrade your app's performance. This is intended to be a tool to aid you in development and help you catch bugs.
-
-To use it, just add it as a middleware in your redux store:
 
 ```js
-const {applyMiddleware, combineReducers, createStore} = require('redux');
-const thunk = require('redux-thunk');
-const reducer = require('./reducers/index');
+import objectInvariantTestHelper from '../src/index';
 
-// Be sure to ONLY add this middleware in development!
-const middleware = process.env.NODE_ENV !== 'production' ?
-  [require('redux-immutable-state-invariant')(), thunk] :
-  [thunk];
+const toAdd = 2;
+const expectedState = {num: 3};
 
-// Note passing middleware as the last argument to createStore requires redux@>=3.1.0
-const store = createStore(
-  reducer,
-  applyMiddleware(...middleware)
-);
+describe('goodReducer', () => {
+  it('should *not* mutate state', () => {
+    let initialState = {num: 1};
+    const tracked = objectInvariantTestHelper.trackObj(initialState);
+
+    let finalState = goodReducer(initialState, {
+      type: 'ADD',
+      payload: { toAdd }
+    });
+
+    expect(finalState).toEqual(expectedState);
+    expect(objectInvariantTestHelper.hasMutated(tracked)).toEqual(false);
+  });
+});
 ```
 
-Then if you're doing things correctly, you should see nothing different. But if you don't, that is, if you're mutating your data somewhere in your app either in a dispatch or between dispatches, an error will be thrown with a (hopefully) descriptive message.
+If you want to provide your own `isImmutable` function, you may:
+
+```js
+import { objectInvariantTestHelperMkr } from '../src/index';
+let objectInvariantTestHelper = objectInvariantTestHelperMkr(isImmutable);
+```
