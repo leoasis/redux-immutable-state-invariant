@@ -2,6 +2,8 @@ import expect from 'expect';
 import isImmutable from '../src/isImmutable';
 import trackForMutations from '../src/trackForMutations';
 
+/* global describe, it */
+
 describe('trackForMutations', () => {
   function testCasesForMutation(spec) {
     it('returns true and the mutated path', () => {

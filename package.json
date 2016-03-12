@@ -1,24 +1,38 @@
 {
-  "name": "redux-immutable-state-invariant",
-  "version": "1.2.0",
-  "description": "Redux middleware that detects mutations between and outside redux dispatches. For development use only.",
+  "name": "object-invariant-test-helper",
+  "version": "0.1.0",
   "main": "dist/index.js",
   "scripts": {
     "clean": "rm -rf dist",
     "build": "babel --out-dir dist src",
+    "lint": "eslint src test",
     "test": "mocha --compilers js:babel/register",
-    "prepublish": "npm run clean && npm run build",
-    "example": "cd example && rm -rf node_modules/redux-immutable-state-invariant && npm install && npm start"
+    "prepublish": "npm run clean && npm run build"
   },
-  "author": "Leonardo Andres Garcia Crespo <leoasis@gmail.com>",
+  "contributors": [
+    {
+      "name": "Leonardo Andres Garcia Crespo",
+      "email": "leoasis@gmail.com"
+    },
+    {
+      "name": "Jana Beck",
+      "email": "jana@tidepool.org"
+    },
+    {
+      "name": "Gordon Dent",
+      "email": "gordonmdent@gmail.com"
+    }
+  ],
   "license": "MIT",
   "devDependencies": {
-    "babel": "^5.8.3",
-    "expect": "^1.8.0",
-    "mocha": "^2.2.5"
+    "babel": "5.8.35",
+    "babel-eslint": "5.0.0",
+    "eslint": "1.10.3",
+    "expect": "1.15.2",
+    "mocha": "2.4.5"
   },
-  "dependencies": {
-    "invariant": "^2.1.0",
-    "json-stringify-safe": "^5.0.1"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tidepool-org/object-invariant-test-helper.git"
   }
 }
