@@ -42,7 +42,7 @@ function detectMutations(isImmutable, trackedProperty, obj, sameParentRef = fals
     keys[key] = true;
   });
 
-  for (let key of Object.keys(keys)) {
+  for (let key in keys) {
     const result = detectMutations(
       isImmutable,
       trackedProperty.children[key],
