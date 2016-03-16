@@ -1,6 +1,6 @@
 {
   "name": "redux-immutable-state-invariant",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Redux middleware that detects mutations between and outside redux dispatches. For development use only.",
   "main": "dist/index.js",
   "scripts": {
