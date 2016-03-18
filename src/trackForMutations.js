@@ -34,15 +34,17 @@ function detectMutations(isImmutable, trackedProperty, obj, sameParentRef = fals
   }
 
   // Gather all keys from prev (tracked) and after objs
-  const keys = {};
+  const keysToDetect = {};
   Object.keys(trackedProperty.children).forEach(key => {
-    keys[key] = true;
+    keysToDetect[key] = true;
   });
   Object.keys(obj).forEach(key => {
-    keys[key] = true;
+    keysToDetect[key] = true;
   });
 
-  for (let key in keys) {
+  const keys = Object.keys(keysToDetect);
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
     const result = detectMutations(
       isImmutable,
       trackedProperty.children[key],
