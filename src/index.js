@@ -16,7 +16,7 @@ const INSIDE_DISPATCH_MESSAGE = [
 ].join(' ');
 
 export default function immutableStateInvariantMiddleware(isImmutable = isImmutableDefault) {
-  let track = trackForMutations.bind(null, isImmutable);
+  const track = trackForMutations.bind(null, isImmutable);
 
   return ({getState}) => {
     let state = getState();
