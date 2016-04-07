@@ -1,10 +1,10 @@
 export default function trackForMutations(isImmutable, obj) {
-  const trackedProperties = trackProperties(isImmutable, obj)
+  const trackedProperties = trackProperties(isImmutable, obj);
   return {
     detectMutations() {
-      return detectMutations(isImmutable, trackedProperties, obj)
+      return detectMutations(isImmutable, trackedProperties, obj);
     }
-  }
+  };
 }
 
 function trackProperties(isImmutable, obj) {
@@ -13,7 +13,7 @@ function trackProperties(isImmutable, obj) {
   if (!isImmutable(obj)) {
     tracked.children = {};
 
-    for (let key in obj) {
+    for (const key in obj) {
       tracked.children[key] = trackProperties(isImmutable, obj[key]);
     }
   }
@@ -26,7 +26,7 @@ function detectMutations(isImmutable, trackedProperty, obj, sameParentRef = fals
   const sameRef = prevObj === obj;
 
   if (sameParentRef && !sameRef) {
-    return { wasMutated: true, path }
+    return { wasMutated: true, path };
   }
 
   if (isImmutable(prevObj) || isImmutable(obj)) {
