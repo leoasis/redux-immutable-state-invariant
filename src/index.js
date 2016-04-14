@@ -6,13 +6,13 @@ import trackForMutations from './trackForMutations';
 const BETWEEN_DISPATCHES_MESSAGE = [
   'A state mutation was detected between dispatches, in the path `%s`.',
   'This may cause incorrect behavior.',
-  '(http://rackt.github.io/redux/docs/Troubleshooting.html#never-mutate-reducer-arguments)'
+  '(http://redux.js.org/docs/Troubleshooting.html#never-mutate-reducer-arguments)'
 ].join(' ');
 
 const INSIDE_DISPATCH_MESSAGE = [
   'A state mutation was detected inside a dispatch, in the path: `%s`.',
   'Take a look at the reducer(s) handling the action %s.',
-  '(http://rackt.github.io/redux/docs/Troubleshooting.html#never-mutate-reducer-arguments)'
+  '(http://redux.js.org/docs/Troubleshooting.html#never-mutate-reducer-arguments)'
 ].join(' ');
 
 export default function immutableStateInvariantMiddleware(isImmutable = isImmutableDefault) {
