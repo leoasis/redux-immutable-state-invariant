@@ -6,7 +6,7 @@ Redux middleware that spits an error on you when you try to mutate your state ei
 
 ## Why?
 
-Because [you're not allowed to mutate your state in your reducers](http://rackt.github.io/redux/docs/Troubleshooting.html#never-mutate-reducer-arguments)!. And by extension, you shouldn't mutate them either outside. In order to change state in your app, you should always return a new instance of your state with the changes.
+Because [you're not allowed to mutate your state in your reducers](http://redux.js.org/docs/Troubleshooting.html#never-mutate-reducer-arguments)!. And by extension, you shouldn't mutate them either outside. In order to change state in your app, you should always return a new instance of your state with the changes.
 
 If you're using a library such as `Immutable.js`, this is automatically done for you since the structures provided by that library don't allow you to mutate them (as long as you don't have mutable stuff as values in those collections). However, if you're using regular objects and arrays, you should be careful to avoid mutations.
 
