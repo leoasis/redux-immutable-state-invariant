@@ -7,6 +7,8 @@
     "clean": "rm -rf dist",
     "build": "babel --out-dir dist src",
     "test": "mocha --compilers js:babel/register",
+    "test:coverage": "rm -rf coverage/ && istanbul cover --report lcov _mocha -- --compilers js:babel/register test/*.spec.js --recursive",
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
     "prepublish": "npm run clean && npm run build",
     "example": "cd example && rm -rf node_modules/redux-immutable-state-invariant && npm install && npm start"
   },
@@ -14,7 +16,9 @@
   "license": "MIT",
   "devDependencies": {
     "babel": "^5.8.3",
+    "coveralls": "^2.11.12",
     "expect": "^1.8.0",
+    "istanbul": "^0.4.4",
     "mocha": "^2.2.5"
   },
   "dependencies": {
