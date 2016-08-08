@@ -2,9 +2,14 @@ language: node_js
 node_js:
   - "0.12.0"
   - "stable"
+  
 script:
-  - npm test
+  - npm run test:coverage
 
 notifications:
   email: false
+
+after_success: 
+  - npm run coveralls
+
   
