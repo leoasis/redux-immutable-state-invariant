@@ -3,6 +3,7 @@
   "version": "1.2.3",
   "description": "Redux middleware that detects mutations between and outside redux dispatches. For development use only.",
   "main": "dist/index.js",
+  "repository": "leoasis/redux-immutable-state-invariant",
   "scripts": {
     "clean": "rm -rf dist",
     "build": "babel --out-dir dist src",
