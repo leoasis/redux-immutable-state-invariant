@@ -84,4 +84,15 @@ describe('immutableStateInvariantMiddleware', () => {
       dispatch({type: 'SOME_ACTION', x});
     }).toNotThrow();
   });
+
+  it('works correctly with NaN', () => {
+    const next = action => action;
+
+    const dispatch = middleware(next);
+
+    state = {foo: NaN};
+    expect(() => {
+      dispatch({type: 'SOME_ACTION'});
+    }).toNotThrow();
+  })
 });
