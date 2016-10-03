@@ -226,6 +226,10 @@ describe('trackForMutations', () => {
       fn: (s) => {
         return {...s, foo: {}};
       }
+    },
+    'having a NaN in the state': {
+      getState: () => ({ a:NaN, b: Number.NaN }),
+      fn: (s) => s
     }
   };
 
