@@ -1,12 +1,14 @@
 import expect from 'expect';
-import isImmutable from '../src/isImmutable';
+import isImmutableDefault from '../src/isImmutable';
 import trackForMutations from '../src/trackForMutations';
 
 describe('trackForMutations', () => {
   function testCasesForMutation(spec) {
     it('returns true and the mutated path', () => {
       const state = spec.getState();
-      const tracker = trackForMutations(isImmutable, undefined, state);
+      const options = spec.middlewareOptions || {};
+      const { isImmutable = isImmutableDefault, ignore } = options;
+      const tracker = trackForMutations(isImmutable, ignore, state);
       const newState = spec.fn(state);
 
       expect(
@@ -18,26 +20,8 @@ describe('trackForMutations', () => {
   function testCasesForNonMutation(spec) {
     it('returns false', () => {
       const state = spec.getState();
-      const tracker = trackForMutations(isImmutable, undefined, state);
-      const newState = spec.fn(state);
-
-      expect(
-        tracker.detectMutations()
-      ).toEqual({wasMutated: false});
-    });
-  }
-
-  function testCasesForIgnoreMutationDetectionByPath(spec) {
-    it('returns false', () => {
-      // ignore all top level branches of state used in spec
-      const getKeys = (s) => s === Object(s) ? Object.keys(s) : []
-      const refState = spec.getState();
-      const keys = getKeys(refState);
-      spec.fn(refState);
-      const mutateKeys = getKeys(refState);
-      const ignore = [...new Set(keys.concat(mutateKeys))];
-      // use found ignore keys from spec dry run
-      const state = spec.getState()
+      const options = spec.middlewareOptions || {};
+      const { isImmutable = isImmutableDefault, ignore } = options;
       const tracker = trackForMutations(isImmutable, ignore, state);
       const newState = spec.fn(state);
 
@@ -183,18 +167,31 @@ describe('trackForMutations', () => {
         return s;
       },
       path: ['foo']
+    },
+    'catching state mutation in non-ignored branch': {
+      getState: () => ({
+        foo: {
+          bar: [1, 2]
+        },
+        boo: {
+          yah: [1, 2]
+        }
+      }),
+      fn: (s) => {
+        s.foo.bar.push(3);
+        s.boo.yah.push(3);
+        return s;
+      },
+      middlewareOptions: {
+        ignore: ['foo']
+      },
+      path: ['boo', 'yah', '2']
     }
   };
 
   Object.keys(mutations).forEach((mutationDesc) => {
     describe(mutationDesc, () => {
       testCasesForMutation(mutations[mutationDesc]);
-    });
-  });
-
-  Object.keys(mutations).forEach((mutationDesc) => {
-    describe(`(ignore) ${mutationDesc}`, () => {
-      testCasesForIgnoreMutationDetectionByPath(mutations[mutationDesc]);
     });
   });
 
@@ -256,23 +253,22 @@ describe('trackForMutations', () => {
     'having a NaN in the state': {
       getState: () => ({ a:NaN, b: Number.NaN }),
       fn: (s) => s
-    }
-  };
-
-  Object.keys(nonMutations).forEach((nonMutationDesc) => {
-    describe(nonMutationDesc, () => {
-      testCasesForNonMutation(nonMutations[nonMutationDesc]);
-    });
-  });
-
-  Object.keys(nonMutations).forEach((nonMutationDesc) => {
-    describe(`(ignore) ${nonMutationDesc}`, () => {
-      testCasesForIgnoreMutationDetectionByPath(nonMutations[nonMutationDesc]);
-    });
-  });
-
-  it('can ignore nested branches from mutation detection', () => {
-    const spec = {
+    },
+    'ignoring branches from mutation detection': {
+      getState: () => ({
+        foo: {
+          bar: 'bar'
+        },
+      }),
+      fn: (s) => {
+        s.foo.bar = 'baz'
+        return s;
+      },
+      middlewareOptions: {
+        ignore: ['foo']
+      },
+    },
+    'ignoring nested branches from mutation detection': {
       getState: () => ({
         foo: {
           bar: [1, 2],
@@ -280,51 +276,36 @@ describe('trackForMutations', () => {
             yah: [1, 2]
           }
         },
-        stuff: [{a: 1}, {a: 2}]
       }),
       fn: (s) => {
         s.foo.bar.push(3);
         s.foo.boo.yah.push(3);
+        return s;
+      },
+      middlewareOptions: {
+        ignore: [
+          'foo.bar',
+          'foo.boo.yah',
+        ]
+      }
+    },
+    'ignoring nested array indices from mutation detection': {
+      getState: () => ({
+        stuff: [{a: 1}, {a: 2}]
+      }),
+      fn: (s) => {
         s.stuff[1].a = 3
         return s;
       },
-    };
-    const state = spec.getState();
-    const tracker = trackForMutations(isImmutable, [
-      'foo.bar',
-      'foo.boo.yah',
-      'stuff.1',
-    ], state);
-    const newState = spec.fn(state);
+      middlewareOptions: {
+        ignore: ['stuff.1']
+      }
+    }
+  };
 
-    expect(
-      tracker.detectMutations()
-    ).toEqual({wasMutated: false});
-  });
-
-  it('will catch state mutation in non-ignore branch', () => {
-    const spec = {
-      getState: () => ({
-        foo: {
-          bar: [1, 2]
-        },
-        boo: {
-          yah: [1, 2]
-        }
-      }),
-      fn: (s) => {
-        s.foo.bar.push(3);
-        s.boo.yah.push(3);
-        return s;
-      },
-      path: ['boo', 'yah', '2']
-    };
-    const state = spec.getState();
-    const tracker = trackForMutations(isImmutable, ['foo'], state);
-    const newState = spec.fn(state);
-
-    expect(
-      tracker.detectMutations()
-    ).toEqual({wasMutated: true, path: spec.path});
+  Object.keys(nonMutations).forEach((nonMutationDesc) => {
+    describe(nonMutationDesc, () => {
+      testCasesForNonMutation(nonMutations[nonMutationDesc]);
+    });
   });
 });

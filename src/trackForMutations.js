@@ -14,7 +14,8 @@ function trackProperties(isImmutable, ignore = [], obj, path = []) {
     tracked.children = {};
 
     for (const key in obj) {
-      if (ignore.length && ignore.includes([ ...path, key].join('.'))) {
+      const childPath = path.concat(key);
+      if (ignore.length && ignore.indexOf(childPath.join('.')) !== -1) {
         continue;
       }
 
@@ -22,7 +23,7 @@ function trackProperties(isImmutable, ignore = [], obj, path = []) {
         isImmutable,
         ignore,
         obj[key],
-        path.concat(key)
+        childPath
       );
     }
   }
@@ -54,7 +55,8 @@ function detectMutations(isImmutable, ignore = [], trackedProperty, obj, samePar
   const keys = Object.keys(keysToDetect);
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    if (ignore.length && ignore.includes([ ...path, key].join('.'))) {
+    const childPath = path.concat(key);
+    if (ignore.length && ignore.indexOf(childPath.join('.')) !== -1) {
       continue;
     }
 
@@ -64,7 +66,7 @@ function detectMutations(isImmutable, ignore = [], trackedProperty, obj, samePar
       trackedProperty.children[key],
       obj[key],
       sameRef,
-      path.concat(key)
+      childPath
     );
 
     if (result.wasMutated) {
