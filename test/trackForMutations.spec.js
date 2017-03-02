@@ -279,16 +279,22 @@ describe('trackForMutations', () => {
           boo: {
             yah: [1, 2]
           }
-        }
+        },
+        stuff: [{a: 1}, {a: 2}]
       }),
       fn: (s) => {
         s.foo.bar.push(3);
         s.foo.boo.yah.push(3);
+        s.stuff[1].a = 3
         return s;
       },
     };
     const state = spec.getState();
-    const tracker = trackForMutations(isImmutable, ['foo.bar', 'foo.boo.yah'], state);
+    const tracker = trackForMutations(isImmutable, [
+      'foo.bar',
+      'foo.boo.yah',
+      'stuff.1',
+    ], state);
     const newState = spec.fn(state);
 
     expect(
