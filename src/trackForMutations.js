@@ -1,26 +1,35 @@
-export default function trackForMutations(isImmutable, obj) {
-  const trackedProperties = trackProperties(isImmutable, obj);
+export default function trackForMutations(isImmutable, ignore, obj) {
+  const trackedProperties = trackProperties(isImmutable, ignore, obj);
   return {
     detectMutations() {
-      return detectMutations(isImmutable, trackedProperties, obj);
+      return detectMutations(isImmutable, ignore, trackedProperties, obj);
     }
   };
 }
 
-function trackProperties(isImmutable, obj) {
+function trackProperties(isImmutable, ignore = [], obj, path = []) {
   const tracked = { value: obj };
 
   if (!isImmutable(obj)) {
     tracked.children = {};
 
     for (const key in obj) {
-      tracked.children[key] = trackProperties(isImmutable, obj[key]);
+      if (ignore.length && ignore.includes([ ...path, key].join('.'))) {
+        continue;
+      }
+
+      tracked.children[key] = trackProperties(
+        isImmutable,
+        ignore,
+        obj[key],
+        path.concat(key)
+      );
     }
   }
   return tracked;
 }
 
-function detectMutations(isImmutable, trackedProperty, obj, sameParentRef = false, path = []) {
+function detectMutations(isImmutable, ignore = [], trackedProperty, obj, sameParentRef = false, path = []) {
   const prevObj = trackedProperty ? trackedProperty.value : undefined;
 
   const sameRef = prevObj === obj;
@@ -45,8 +54,13 @@ function detectMutations(isImmutable, trackedProperty, obj, sameParentRef = fals
   const keys = Object.keys(keysToDetect);
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
+    if (ignore.length && ignore.includes([ ...path, key].join('.'))) {
+      continue;
+    }
+
     const result = detectMutations(
       isImmutable,
+      ignore,
       trackedProperty.children[key],
       obj[key],
       sameRef,

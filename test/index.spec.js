@@ -84,4 +84,23 @@ describe('immutableStateInvariantMiddleware', () => {
       dispatch({type: 'SOME_ACTION', x});
     }).toNotThrow();
   });
+
+  it('respects "ignore" option', () => {
+    const middlewareIgnore = (next) => {
+      return immutableStateInvariantMiddleware(undefined, {
+        ignore: ['foo.bar']
+      })({getState})(next);
+    }
+
+    const next = action => {
+      state.foo.bar.push(5);
+      return action;
+    };
+
+    const dispatch = middlewareIgnore(next);
+
+    expect(() => {
+      dispatch({type: 'SOME_ACTION'});
+    }).toNotThrow();
+  })
 });
