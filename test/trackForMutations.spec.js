@@ -168,6 +168,17 @@ describe('trackForMutations', () => {
       },
       path: ['foo']
     },
+    'cannot ignore root state': {
+      getState: () => ({ foo: {} }),
+      fn: (s) => {
+        s.foo = {};
+        return s;
+      },
+      middlewareOptions: {
+        ignore: ['']
+      },
+      path: ['foo']
+    },
     'catching state mutation in non-ignored branch': {
       getState: () => ({
         foo: {
