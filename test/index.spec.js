@@ -85,6 +85,20 @@ describe('immutableStateInvariantMiddleware', () => {
     }).toNotThrow();
   });
 
+  it('respects "isImmutable" option', function () {
+    const isImmutable = (value) => true
+    const next = action => {
+      state.foo.bar.push(5);
+      return action;
+    };
+
+    const dispatch = middleware({ isImmutable })(next);
+
+    expect(() => {
+      dispatch({type: 'SOME_ACTION'});
+    }).toNotThrow();
+  })
+
   it('respects "ignore" option', () => {
     const next = action => {
       state.foo.bar.push(5);
