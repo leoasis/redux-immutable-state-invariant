@@ -61,7 +61,7 @@ middleware creation function and default export. supports an optional `object` a
 - **ignore** `string[]` - specify branch(es) of state to ignore when detecting for mutations. elements of array should be dot-separated "path" strings that match named nodes from the root state.
 
     ```js
-    // example: ignore mutation detection along the 'foo' & 'bar.thingsToIgnore' branches of state
+    // example: ignore mutation detection along the 'foo' & 'bar.thingsToIgnore' branches
     const mw = immutableStateInvariantMiddleware({ ignore: ['foo', 'bar.thingsToIgnore'] })
     ```
 
