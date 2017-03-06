@@ -48,11 +48,11 @@ Then if you're doing things correctly, you should see nothing different. But if 
 
 #### `immutableStateInvariantMiddleware({ isImmutable, ignore })`
 
-middleware creation function and default export. supports an optional `object` argument used customize middleware behavior with supported options.
+Middleware creation function and default export. Supports an optional `object` argument to customize middleware behavior with supported options.
 
 **Parameters**
 
-- **isImmutable** `function` - override default "isImmutable" implementation (see: src/isImmutable.js). function must accept a single argument and return `true` if the value should be considered immutable, `false` otherwise.
+- **isImmutable** `function` - override default "isImmutable" implementation (see: `src/isImmutable.js`). function must accept a single argument and return `true` if the value should be considered immutable, `false` otherwise.
 
     ```js
     // example: use a custom `isImmutable` implementation
