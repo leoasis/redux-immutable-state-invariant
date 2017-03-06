@@ -5,8 +5,8 @@ describe('immutableStateInvariantMiddleware', () => {
   let state;
   const getState = () => state;
 
-  function middleware(next) {
-    return immutableStateInvariantMiddleware()({getState})(next);
+  function middleware(options) {
+    return immutableStateInvariantMiddleware(options)({getState});
   }
 
   beforeEach(() => {
@@ -15,7 +15,7 @@ describe('immutableStateInvariantMiddleware', () => {
 
   it('sends the action through the middleware chain', () => {
     const next = action => ({...action, returned: true});
-    const dispatch = middleware(next);
+    const dispatch = middleware()(next);
 
     expect(dispatch({type: 'SOME_ACTION'})).toEqual({type: 'SOME_ACTION', returned: true});
   });
@@ -26,7 +26,7 @@ describe('immutableStateInvariantMiddleware', () => {
       return action;
     };
 
-    const dispatch = middleware(next);
+    const dispatch = middleware()(next);
 
     expect(() => {
       dispatch({type: 'SOME_ACTION'});
@@ -36,7 +36,7 @@ describe('immutableStateInvariantMiddleware', () => {
   it('throws if mutating between dispatches', () => {
     const next = action => action;
 
-    const dispatch = middleware(next);
+    const dispatch = middleware()(next);
 
     dispatch({type: 'SOME_ACTION'});
     state.foo.bar.push(5);
@@ -51,7 +51,7 @@ describe('immutableStateInvariantMiddleware', () => {
       return action;
     };
 
-    const dispatch = middleware(next);
+    const dispatch = middleware()(next);
 
     expect(() => {
       dispatch({type: 'SOME_ACTION'});
@@ -61,7 +61,7 @@ describe('immutableStateInvariantMiddleware', () => {
   it('does not throw if not mutating between dispatches', () => {
     const next = action => action;
 
-    const dispatch = middleware(next);
+    const dispatch = middleware()(next);
 
     dispatch({type: 'SOME_ACTION'});
     state = {...state, foo: {...state.foo, baz: 'changed!'}};
@@ -73,7 +73,7 @@ describe('immutableStateInvariantMiddleware', () => {
   it('works correctly with circular references', () => {
     const next = action => action;
 
-    const dispatch = middleware(next);
+    const dispatch = middleware()(next);
 
     let x = {};
     let y = {};
@@ -84,4 +84,31 @@ describe('immutableStateInvariantMiddleware', () => {
       dispatch({type: 'SOME_ACTION', x});
     }).toNotThrow();
   });
+
+  it('respects "isImmutable" option', function () {
+    const isImmutable = (value) => true
+    const next = action => {
+      state.foo.bar.push(5);
+      return action;
+    };
+
+    const dispatch = middleware({ isImmutable })(next);
+
+    expect(() => {
+      dispatch({type: 'SOME_ACTION'});
+    }).toNotThrow();
+  })
+
+  it('respects "ignore" option', () => {
+    const next = action => {
+      state.foo.bar.push(5);
+      return action;
+    };
+
+    const dispatch = middleware({ ignore: ['foo.bar'] })(next);
+
+    expect(() => {
+      dispatch({type: 'SOME_ACTION'});
+    }).toNotThrow();
+  })
 });

@@ -15,8 +15,12 @@ const INSIDE_DISPATCH_MESSAGE = [
   '(http://redux.js.org/docs/Troubleshooting.html#never-mutate-reducer-arguments)'
 ].join(' ');
 
-export default function immutableStateInvariantMiddleware(isImmutable = isImmutableDefault) {
-  const track = trackForMutations.bind(null, isImmutable);
+export default function immutableStateInvariantMiddleware(options = {}) {
+  const {
+    isImmutable = isImmutableDefault,
+    ignore
+  } = options
+  const track = trackForMutations.bind(null, isImmutable, ignore);
 
   return ({getState}) => {
     let state = getState();

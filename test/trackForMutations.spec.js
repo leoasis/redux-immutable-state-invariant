@@ -1,12 +1,14 @@
 import expect from 'expect';
-import isImmutable from '../src/isImmutable';
+import isImmutableDefault from '../src/isImmutable';
 import trackForMutations from '../src/trackForMutations';
 
 describe('trackForMutations', () => {
   function testCasesForMutation(spec) {
     it('returns true and the mutated path', () => {
       const state = spec.getState();
-      const tracker = trackForMutations(isImmutable, state);
+      const options = spec.middlewareOptions || {};
+      const { isImmutable = isImmutableDefault, ignore } = options;
+      const tracker = trackForMutations(isImmutable, ignore, state);
       const newState = spec.fn(state);
 
       expect(
@@ -18,7 +20,9 @@ describe('trackForMutations', () => {
   function testCasesForNonMutation(spec) {
     it('returns false', () => {
       const state = spec.getState();
-      const tracker = trackForMutations(isImmutable, state);
+      const options = spec.middlewareOptions || {};
+      const { isImmutable = isImmutableDefault, ignore } = options;
+      const tracker = trackForMutations(isImmutable, ignore, state);
       const newState = spec.fn(state);
 
       expect(
@@ -163,6 +167,36 @@ describe('trackForMutations', () => {
         return s;
       },
       path: ['foo']
+    },
+    'cannot ignore root state': {
+      getState: () => ({ foo: {} }),
+      fn: (s) => {
+        s.foo = {};
+        return s;
+      },
+      middlewareOptions: {
+        ignore: ['']
+      },
+      path: ['foo']
+    },
+    'catching state mutation in non-ignored branch': {
+      getState: () => ({
+        foo: {
+          bar: [1, 2]
+        },
+        boo: {
+          yah: [1, 2]
+        }
+      }),
+      fn: (s) => {
+        s.foo.bar.push(3);
+        s.boo.yah.push(3);
+        return s;
+      },
+      middlewareOptions: {
+        ignore: ['foo']
+      },
+      path: ['boo', 'yah', '2']
     }
   };
 
@@ -230,6 +264,53 @@ describe('trackForMutations', () => {
     'having a NaN in the state': {
       getState: () => ({ a:NaN, b: Number.NaN }),
       fn: (s) => s
+    },
+    'ignoring branches from mutation detection': {
+      getState: () => ({
+        foo: {
+          bar: 'bar'
+        },
+      }),
+      fn: (s) => {
+        s.foo.bar = 'baz'
+        return s;
+      },
+      middlewareOptions: {
+        ignore: ['foo']
+      },
+    },
+    'ignoring nested branches from mutation detection': {
+      getState: () => ({
+        foo: {
+          bar: [1, 2],
+          boo: {
+            yah: [1, 2]
+          }
+        },
+      }),
+      fn: (s) => {
+        s.foo.bar.push(3);
+        s.foo.boo.yah.push(3);
+        return s;
+      },
+      middlewareOptions: {
+        ignore: [
+          'foo.bar',
+          'foo.boo.yah',
+        ]
+      }
+    },
+    'ignoring nested array indices from mutation detection': {
+      getState: () => ({
+        stuff: [{a: 1}, {a: 2}]
+      }),
+      fn: (s) => {
+        s.stuff[1].a = 3
+        return s;
+      },
+      middlewareOptions: {
+        ignore: ['stuff.1']
+      }
     }
   };
 

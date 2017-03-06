@@ -43,3 +43,26 @@ const store = createStore(
 ```
 
 Then if you're doing things correctly, you should see nothing different. But if you don't, that is, if you're mutating your data somewhere in your app either in a dispatch or between dispatches, an error will be thrown with a (hopefully) descriptive message.
+
+## API
+
+#### `immutableStateInvariantMiddleware({ isImmutable, ignore })`
+
+Middleware creation function and default export. Supports an optional `object` argument to customize middleware behavior with supported options.
+
+**Parameters**
+
+- **isImmutable** `function` - override default "isImmutable" implementation (see: `src/isImmutable.js`). function must accept a single argument and return `true` if the value should be considered immutable, `false` otherwise.
+
+    ```js
+    // example: use a custom `isImmutable` implementation
+    const mw = immutableStateInvariantMiddleware({ isImmutable: customIsImmutable })
+    ```
+- **ignore** `string[]` - specify branch(es) of state to ignore when detecting for mutations. elements of array should be dot-separated "path" strings that match named nodes from the root state.
+
+    ```js
+    // example: ignore mutation detection along the 'foo' & 'bar.thingsToIgnore' branches
+    const mw = immutableStateInvariantMiddleware({ ignore: ['foo', 'bar.thingsToIgnore'] })
+    ```
+
+Returns: `function` - the middleware function
