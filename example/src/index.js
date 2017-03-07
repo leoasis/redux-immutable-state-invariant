@@ -1,7 +1,5 @@
 const {createStore, applyMiddleware} = require('redux');
-const immutableStateInvariant = require('redux-immutable-state-invariant');
-
-const createStoreWithMiddleware = applyMiddleware(immutableStateInvariant())(createStore);
+const { default: immutableStateInvariant } = require('redux-immutable-state-invariant');
 
 const initialState = {
   stuff: []
@@ -17,6 +15,9 @@ function reducer(state = initialState, action) {
   }
 }
 
-const store = createStoreWithMiddleware(reducer);
+const store = createStore(
+  reducer,
+  applyMiddleware(immutableStateInvariant())
+);
 
 store.dispatch({type: 'ARRAY_MUTATION', element: {a:1, b:2}});
