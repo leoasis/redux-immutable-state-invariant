@@ -48,21 +48,20 @@ Then if you're doing things correctly, you should see nothing different. But if 
 
 #### `immutableStateInvariantMiddleware({ isImmutable, ignore })`
 
-Middleware creation function and default export. Supports an optional `object` argument to customize middleware behavior with supported options.
+The default export is a factory to create the middleware. Supports an `options` argument (optional) to customize middleware behavior. It returns the `middleware` function when called. The following properties are supported in `options`:
 
-**Parameters**
+**Options**
 
-- **isImmutable** `function` - override default "isImmutable" implementation (see: `src/isImmutable.js`). function must accept a single argument and return `true` if the value should be considered immutable, `false` otherwise.
+- **isImmutable** `function(value)` - Specify if a value should be treated as immutable or not. The default implementation will return `true` for primitive types (like numbers, strings, booleans, `null` and `undefined`). Useful if some state of your app uses a library like `Immutable.js` and you want to let the middleware know that the data structures are indeed immutable.
 
-    ```js
-    // example: use a custom `isImmutable` implementation
-    const mw = immutableStateInvariantMiddleware({ isImmutable: customIsImmutable })
-    ```
-- **ignore** `string[]` - specify branch(es) of state to ignore when detecting for mutations. elements of array should be dot-separated "path" strings that match named nodes from the root state.
+- **ignore** `string[]` - specify branch(es) of the state object to ignore when detecting for mutations. The elements of the array should be dot-separated "path" strings that match named nodes from the root state.
 
     ```js
     // example: ignore mutation detection along the 'foo' & 'bar.thingsToIgnore' branches
-    const mw = immutableStateInvariantMiddleware({ ignore: ['foo', 'bar.thingsToIgnore'] })
+    const middleware = immutableStateInvariantMiddleware({
+      ignore: [
+        'foo',
+        'bar.thingsToIgnore'
+      ]
+    });
     ```
-
-Returns: `function` - the middleware function
