@@ -32,7 +32,7 @@ const reducer = require('./reducers/index');
 
 // Be sure to ONLY add this middleware in development!
 const middleware = process.env.NODE_ENV !== 'production' ?
-  [require('redux-immutable-state-invariant')(), thunk] :
+  [require('redux-immutable-state-invariant').default(), thunk] :
   [thunk];
 
 // Note passing middleware as the last argument to createStore requires redux@>=3.1.0
