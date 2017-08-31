@@ -47,7 +47,7 @@ export default function immutableStateInvariantMiddleware(options = {}) {
       // Track before potentially not meeting the invariant
       tracker = track(state);
 
-      invariant(
+      result.wasMutated && invariant(
         !result.wasMutated,
         INSIDE_DISPATCH_MESSAGE,
         (result.path || []).join('.'),
