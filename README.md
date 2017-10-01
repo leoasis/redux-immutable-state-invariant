@@ -65,3 +65,4 @@ The default export is a factory to create the middleware. Supports an `options` 
       ]
     });
     ```
+- **logToConsoleOnly** `bool` - Only logs to console.error instead of throwing.  This is helpful if the current app is making many undesirable mutations and you plan to fix them gradually.
