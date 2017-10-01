@@ -125,7 +125,6 @@ describe('immutableStateInvariantMiddleware', () => {
     expect(() => {
       dispatch({type: 'SOME_ACTION'});
     }).toNotThrow();
-    expect(console.error.calledOnce).toEqual(true);
     expect(console.error.calledWith(sinon.match.any, sinon.match(new RegExp('foo\\.bar\\.3')))).toEqual(true);
     console.error.restore();
   });
