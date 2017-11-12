@@ -62,7 +62,7 @@ export default function immutableStateInvariantMiddleware(options = {}) {
           stringify(action)
         );
       } else {
-        invariant(
+        result.wasMutated && invariant(
           !result.wasMutated,
           INSIDE_DISPATCH_MESSAGE,
           (result.path || []).join('.'),
