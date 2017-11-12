@@ -18,7 +18,8 @@ const INSIDE_DISPATCH_MESSAGE = [
 export default function immutableStateInvariantMiddleware(options = {}) {
   const {
     isImmutable = isImmutableDefault,
-    ignore
+    ignore,
+    logToConsoleOnly
   } = options
   const track = trackForMutations.bind(null, isImmutable, ignore);
 
@@ -34,11 +35,18 @@ export default function immutableStateInvariantMiddleware(options = {}) {
       // Track before potentially not meeting the invariant
       tracker = track(state);
 
-      invariant(
-        !result.wasMutated,
-        BETWEEN_DISPATCHES_MESSAGE,
-        (result.path || []).join('.')
-      );
+      if (logToConsoleOnly) {
+        result.wasMutated && console.error(
+          BETWEEN_DISPATCHES_MESSAGE,
+          (result.path || []).join('.')
+        );
+      } else {
+        invariant(
+          !result.wasMutated,
+          BETWEEN_DISPATCHES_MESSAGE,
+          (result.path || []).join('.')
+        );
+      }
 
       const dispatchedAction = next(action);
       state = getState();
@@ -46,13 +54,21 @@ export default function immutableStateInvariantMiddleware(options = {}) {
       result = tracker.detectMutations();
       // Track before potentially not meeting the invariant
       tracker = track(state);
-
-      result.wasMutated && invariant(
-        !result.wasMutated,
-        INSIDE_DISPATCH_MESSAGE,
-        (result.path || []).join('.'),
-        stringify(action)
-      );
+      
+      if (logToConsoleOnly) {
+        result.wasMutated && console.error(
+          INSIDE_DISPATCH_MESSAGE,
+          (result.path || []).join('.'),
+          stringify(action)
+        );
+      } else {
+        result.wasMutated && invariant(
+          !result.wasMutated,
+          INSIDE_DISPATCH_MESSAGE,
+          (result.path || []).join('.'),
+          stringify(action)
+        );
+      }
 
       return dispatchedAction;
     };

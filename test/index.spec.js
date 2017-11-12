@@ -1,5 +1,6 @@
 import expect from 'expect';
 import immutableStateInvariantMiddleware from '../src/index';
+import sinon from 'sinon';
 
 describe('immutableStateInvariantMiddleware', () => {
   let state;
@@ -97,7 +98,7 @@ describe('immutableStateInvariantMiddleware', () => {
     expect(() => {
       dispatch({type: 'SOME_ACTION'});
     }).toNotThrow();
-  })
+  });
 
   it('respects "ignore" option', () => {
     const next = action => {
@@ -110,5 +111,50 @@ describe('immutableStateInvariantMiddleware', () => {
     expect(() => {
       dispatch({type: 'SOME_ACTION'});
     }).toNotThrow();
-  })
+  });
+});
+
+describe('immutableStateInvariantMiddleware with console logging', () => {
+  let state;
+  const getState = () => state;
+
+  function middleware(options) {
+    return immutableStateInvariantMiddleware(options)({getState});
+  }
+
+  beforeEach(() => {
+    sinon.spy(console, 'error');
+    state = {foo: {bar: [2, 3, 4], baz: 'baz'}};
+  });
+
+  afterEach(() => {
+    console.error.restore();
+  });
+
+  it('logs if mutating inside the dispatch', () => {
+    const next = action => {
+      state.foo.bar.push(5);
+      return action;
+    };
+
+    const dispatch = middleware({ logToConsoleOnly: true })(next);
+
+    expect(() => {
+      dispatch({type: 'SOME_ACTION'});
+    }).toNotThrow();
+    expect(console.error.calledWith(sinon.match.any, sinon.match(new RegExp('foo\\.bar\\.3')))).toEqual(true);
+  });
+
+  it('logs if mutating between dispatches', () => {
+    const next = action => action;
+
+    const dispatch = middleware({ logToConsoleOnly: true })(next);
+
+    dispatch({type: 'SOME_ACTION'});
+    state.foo.bar.push(5);
+    expect(() => {
+      dispatch({type: 'SOME_OTHER_ACTION'});
+    }).toNotThrow();
+    expect(console.error.calledWith(sinon.match.any, sinon.match(new RegExp('foo\\.bar\\.3')))).toEqual(true);
+  });
 });
