@@ -13,7 +13,7 @@ describe('trackForMutations', () => {
 
       expect(
         tracker.detectMutations()
-      ).toEqual({wasMutated: true, path: spec.path});
+      ).toEqual({ wasMutated: true, path: spec.path });
     });
   }
 
@@ -27,10 +27,12 @@ describe('trackForMutations', () => {
 
       expect(
         tracker.detectMutations()
-      ).toEqual({wasMutated: false});
+      ).toEqual({ wasMutated: false });
     });
   }
 
+  const mockObj = {};
+  const mockFn = () => {};
   const mutations = {
     'adding to nested array': {
       getState: () => ({
@@ -197,7 +199,110 @@ describe('trackForMutations', () => {
         ignore: ['foo']
       },
       path: ['boo', 'yah', '2']
-    }
+    },
+    'setting value on Map': {
+      getState: () => {
+        const map = new Map();
+        map.set('bar', 9000)
+        return { foo: map };
+      },
+      fn: (s) => {
+        s.foo.set('bar', 9001)
+        return s;
+      },
+      path: ['foo', 'bar']
+    },
+    'deleting value on Map': {
+      getState: () => {
+        const map = new Map();
+        map.set('bar', 9000)
+        map.set('baz', 9001)
+        return { foo: map };
+      },
+      fn: (s) => {
+        s.foo.delete('bar')
+        return s;
+      },
+      path: ['foo', 'bar']
+    },
+    'clearing values on Map': {
+      getState: () => {
+        const map = new Map();
+        map.set('bar', 9000)
+        map.set('baz', 9001)
+        return { foo: map };
+      },
+      fn: (s) => {
+        s.foo.clear()
+        return s;
+      },
+      path: ['foo', 'bar']
+    },
+    'changing value of Map keyed by number': {
+      getState: () => {
+        return new Map()
+          .set(5, 9000)
+          .set(6, 9001);
+      },
+      fn: (s) => {
+        s.set(5, 9002)
+        return s;
+      },
+      path: [5]
+    },
+    'changing value of Map keyed by function': {
+      getState: () => {
+        return new Map().set(mockFn, 9000)
+      },
+      fn: (s) => {
+        s.set(mockFn, 9001)
+        return s;
+      },
+      path: [mockFn]
+    },
+    'changing value of Map keyed by Object': {
+      getState: () => {
+        return new Map().set(mockObj, 9000)
+      },
+      fn: (s) => {
+        s.set(mockObj, 9001)
+        return s;
+      },
+      path: [mockObj]
+    },
+    'adding to Set': {
+      getState: () => {
+        const set = new Set([2, 3, 4]);
+        return { foo: set };
+      },
+      fn: (s) => {
+        s.foo.add(5);
+        return s;
+      },
+      path: ['foo', '3']
+    },
+    'deleting value in Set': {
+      getState: () => {
+        const set = new Set([2, 3, 4]);
+        return { foo: set };
+      },
+      fn: (s) => {
+        s.foo.delete(3);
+        return s;
+      },
+      path: ['foo', '1']
+    },
+    'clearing values in Set': {
+      getState: () => {
+        const set = new Set([2, 3, 4]);
+        return { foo: set };
+      },
+      fn: (s) => {
+        s.foo.clear();
+        return s;
+      },
+      path: ['foo', '0']
+    },
   };
 
   Object.keys(mutations).forEach((mutationDesc) => {
@@ -310,6 +415,26 @@ describe('trackForMutations', () => {
       },
       middlewareOptions: {
         ignore: ['stuff.1']
+      }
+    },
+    'ignoring nested values of a Map': {
+      getState: () => new Map().set('foo', 'bar'),
+      fn: (s) => {
+        s.clear()
+        return s;
+      },
+      middlewareOptions: {
+        ignore: ['foo']
+      }
+    },
+    'ignoring nested values of a Set': {
+      getState: () => new Set().add('foo').add('bar'),
+      fn: (s) => {
+        s.delete('foo');
+        return s;
+      },
+      middlewareOptions: {
+        ignore: ['0', '1']
       }
     }
   };

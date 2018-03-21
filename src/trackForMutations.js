@@ -11,20 +11,22 @@ function trackProperties(isImmutable, ignore = [], obj, path = []) {
   const tracked = { value: obj };
 
   if (!isImmutable(obj)) {
-    tracked.children = {};
+    const objMap = normalizeIterable(obj);
+    tracked.children = new Map();
 
-    for (const key in obj) {
+    for (const item of objMap) {
+      const [ key, value ] = item;
       const childPath = path.concat(key);
       if (ignore.length && ignore.indexOf(childPath.join('.')) !== -1) {
         continue;
       }
 
-      tracked.children[key] = trackProperties(
+      tracked.children.set(key, trackProperties(
         isImmutable,
         ignore,
-        obj[key],
+        objMap.get(key),
         childPath
-      );
+      ));
     }
   }
   return tracked;
@@ -44,27 +46,28 @@ function detectMutations(isImmutable, ignore = [], trackedProperty, obj, samePar
   }
 
   // Gather all keys from prev (tracked) and after objs
-  const keysToDetect = {};
-  Object.keys(trackedProperty.children).forEach(key => {
-    keysToDetect[key] = true;
+  const keysToDetect = new Map();
+  const objMap = normalizeIterable(obj);
+  trackedProperty.children.forEach((value, key) => {
+    keysToDetect.set(key, true);
   });
-  Object.keys(obj).forEach(key => {
-    keysToDetect[key] = true;
+  objMap.forEach((value, key) => {
+    keysToDetect.set(key, true);
   });
 
-  const keys = Object.keys(keysToDetect);
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
+  for (const item of keysToDetect) {
+    const [ key ] = item;
     const childPath = path.concat(key);
     if (ignore.length && ignore.indexOf(childPath.join('.')) !== -1) {
       continue;
     }
 
+    const { children } = trackedProperty;
     const result = detectMutations(
       isImmutable,
       ignore,
-      trackedProperty.children[key],
-      obj[key],
+      children.get(key),
+      objMap.get(key),
       sameRef,
       childPath
     );
@@ -74,4 +77,31 @@ function detectMutations(isImmutable, ignore = [], trackedProperty, obj, samePar
     }
   }
   return { wasMutated: false };
+}
+
+const normalizeIterable = (obj) => {
+  if (!isIterable(obj)) {
+    // if not iterable, assume plain object
+    const keys = Object.keys(obj);
+    return new Map(keys.map(k => [k, obj[k]]));
+  }
+
+  if (obj instanceof Map) {
+    return obj;
+  }
+
+  const map = new Map();
+  const iterator = [...obj[Symbol.iterator]()];
+  for (let i = 0, il = iterator.length; i < il; i++) {
+    map.set(`${i}`, iterator[i]);
+  }
+  return map;
+}
+
+function isIterable(obj) {
+  // checks for null and undefined
+  if (obj == null) {
+    return false;
+  }
+  return typeof obj[Symbol.iterator] === 'function';
 }
