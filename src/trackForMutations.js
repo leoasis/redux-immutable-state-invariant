@@ -35,7 +35,7 @@ function detectMutations(isImmutable, ignore = [], trackedProperty, obj, samePar
 
   const sameRef = prevObj === obj;
 
-  if (sameParentRef && !sameRef && !Number.isNaN(obj)) {
+  if (sameParentRef && !sameRef && !isNaN(obj)) {
     return { wasMutated: true, path };
   }
 
