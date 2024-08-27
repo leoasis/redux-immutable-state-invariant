@@ -14,7 +14,7 @@
   "devDependencies": {
     "babel-core": "6.23.1",
     "babel-loader": "6.4.0",
-    "webpack": "2.2.1",
+    "webpack": "5.94.0",
     "webpack-dev-server": "2.4.1"
   }
 }
